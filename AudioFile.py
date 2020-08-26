@@ -104,7 +104,7 @@ class AudioFile:
         Digitally clip audio samples by scaling beyond [-1., 1.] and clipping to [-1., 1.].
         :param clip_amount: A number > 1.0 used to scale the normalized audio samples.
         """
-        peak = self.peak
+        peak = min(1.0, self.peak)
         self.normalize().scale_amplitude(clip_amount)
         np.clip(self.samples, -1.0, 1.0, out=self.samples)
         self.scale_amplitude(peak / clip_amount)
@@ -157,7 +157,7 @@ class AudioFile:
         in the middle of the current audio.
         """
         assert(self.sr == audio.sr)
-        audio = deepcopy(audio)
+        audio = audio.copy()
 
         # delay the start of the new audio
         start_sample = int(self.length * relative_start)
@@ -173,7 +173,8 @@ class AudioFile:
 
     def lpf(self, order, cutoff):
         """
-        Low-pass filter. https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.butter.html#scipy.signal.butter
+        Low-pass filter.
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.butter.html#scipy.signal.butter
         :param order: the order of the filter.
         :param cutoff: cutoff frequency in Hz.
         """
@@ -182,5 +183,24 @@ class AudioFile:
         self.samples = filtered
         return self
 
-    def add_reverberation(self):
+    def conv_reverb(self, ir: AudioFile, dry_mix: float = 1.0, wet_mix: float = 1.0, predelay: float = 0.0):
+        """
+        Convolution reverb.
+        :param ir: AudioFile containing impulse response.
+        :param dry_mix: scale of dry audio.
+        :param mix: scale of wet audio.
+        :param predelay: predelay added to wet audio.
+        """
+        ir = ir.copy()
+        if ir.sr != self.sr:
+            ir.resample(self.sr)
+
+        convolution = self.copy()
+        convolution.samples = signal.convolve(self.samples, ir.samples)
+
+        if predelay > 0.0:
+            convolution.add_silence(sec_before=predelay/1000)
+
+        self.scale_amplitude(dry_mix).mix(convolution.scale_amplitude(wet_mix), relative_start=0.0)
+        self.clip_amplitude(clip_amount=1.0)
         return self
