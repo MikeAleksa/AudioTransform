@@ -6,6 +6,7 @@ from typing import Union
 
 import librosa
 import numpy as np
+from scipy import signal
 import soundfile as sf
 
 
@@ -19,9 +20,9 @@ class AudioFile:
         Initialize an audio file. Load file if path is provided.
         :param path: path to audio file.
         """
-        self.samples: np.ndarray = None
-        self.sr: int = None
-        self.filename: str = None
+        self.samples: np.ndarray = np.array([])
+        self.sr: int = int()
+        self.filename: str = str()
         if path is not None:
             self.load(path)
 
@@ -31,6 +32,15 @@ class AudioFile:
         The length in samples of the audio data.
         """
         return self.samples.shape[-1]
+
+    @property
+    def peak(self):
+        """
+        The max absolute amplitude value.
+        """
+        max_amplitude = self.samples.max(axis=-1, initial=0.0)
+        min_amplitude = self.samples.min(axis=-1, initial=0.0)
+        return max(max_amplitude, abs(min_amplitude))
 
     def copy(self) -> AudioFile:
         """
@@ -94,7 +104,7 @@ class AudioFile:
         Digitally clip audio samples by scaling beyond [-1., 1.] and clipping to [-1., 1.].
         :param clip_amount: A number > 1.0 used to scale the normalized audio samples.
         """
-        peak = self.samples.max()
+        peak = self.peak
         self.normalize().scale_amplitude(clip_amount)
         np.clip(self.samples, -1.0, 1.0, out=self.samples)
         self.scale_amplitude(peak / clip_amount)
@@ -147,7 +157,6 @@ class AudioFile:
         in the middle of the current audio.
         """
         assert(self.sr == audio.sr)
-
         audio = deepcopy(audio)
 
         # delay the start of the new audio
@@ -162,10 +171,16 @@ class AudioFile:
         self.samples = self.samples + audio.samples
         return self
 
-    def filter_random(self):
-        return self
-
-    def filter_static(self):
+    def lpf(self, order, cutoff):
+        """
+        Low-pass filter. https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.butter.html#scipy.signal.butter
+        :param order:
+        :param cutoff:
+        :return:
+        """
+        sos = scipy.signal.butter(order, cutoff, btype='low', analog=False, output='sos', fs=self.sr)
+        filtered = signal.sosfilt(sos, self.samples)
+        self.samples = filtered
         return self
 
     def add_reverberation(self):
