@@ -174,11 +174,10 @@ class AudioFile:
     def lpf(self, order, cutoff):
         """
         Low-pass filter. https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.butter.html#scipy.signal.butter
-        :param order:
-        :param cutoff:
-        :return:
+        :param order: the order of the filter.
+        :param cutoff: cutoff frequency in Hz.
         """
-        sos = scipy.signal.butter(order, cutoff, btype='low', analog=False, output='sos', fs=self.sr)
+        sos = signal.butter(order, cutoff, btype='low', analog=False, output='sos', fs=self.sr)
         filtered = signal.sosfilt(sos, self.samples)
         self.samples = filtered
         return self
