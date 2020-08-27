@@ -5,7 +5,8 @@ AudioTransform is a package for modifying mono audio files for use in augmenting
 Operations:
 * load/save audio data
 * resample
-* scale amplitude
+* scale amplitude by a linear constant in [0.0, 1.0]
+* adjust amplitude by a decibel amount
 * normalize amplitude
 * digitally clip amplitude
 * pad with silence
@@ -24,7 +25,7 @@ See `AugmentAudio.ipynb` for examples of how to process audio.
 
 Note - transformations are applied to object itself allowing method chaining for complex signal chains.
 
-If a transformation is only being applied temporarily (e.g. scaling amplitude during mixing) use the copy method to create a new audio file to transform
+If a transformation is only being applied temporarily (e.g. scaling amplitude during mixing) use the copy() method to create a new audio file to transform
 
 Example:
 
@@ -36,7 +37,8 @@ audio2 = AudioFile('example2.wav')
 audio1.mix(audio2.scale(0.5, relative_start=0.0)
 
 # The following line will mix audio1 with (audio2 * 0.5) - audio2 remains unchanged by this operation
-audio1.mix(audio2.copy.scale(0.5), relative_start=0.0)
+# The following line will mix audio1 with (audio2 * 0.5) - audio2 remains unchanged by this operation
+audio1.mix(audio2.copy().scale(0.5), relative_start=0.0)
 ```
 
 # TO-DO

@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from math import log10
 from pathlib import Path
 from typing import Union
 
 import librosa
 import numpy as np
-from scipy import signal
 import soundfile as sf
+from scipy import signal
 
 
 class AudioFile:
@@ -42,6 +43,26 @@ class AudioFile:
         max_amplitude = self.samples.max(axis=-1, initial=0.0)
         min_amplitude = self.samples.min(axis=-1, initial=0.0)
         return max(max_amplitude, abs(min_amplitude))
+
+    @staticmethod
+    def db_to_scale(db: float) -> float:
+        """
+        Convert a decibel value to a scalar in [0.0, 1.0]
+
+        :param db: decibel value - 6db of gain is equivalent to scaling by 2.0
+        :return: a scalar in [0.0. 1.0]
+        """
+        return 10.0 ** (db / 20.0)
+
+    @staticmethod
+    def scale_to_db(factor: float) -> float:
+        """
+        Convert a scalar value in [0.0, 1.0] to a gain adjustment in decibles.
+
+        :param factor: a scalar in [0.0, 1.0]
+        :return: decibel value - 6db of gain is equivalent to scaling by 2.0
+        """
+        return 20.0 * log10(factor)
 
     def copy(self) -> AudioFile:
         """
@@ -101,6 +122,16 @@ class AudioFile:
         self.samples = self.samples * scale
         return self
 
+    def gain(self, db: float):
+        """
+        Adjust gain of audio file by decibels.
+
+        :param db: number of decibels to adjust gain by.
+        """
+        scale = self.db_to_scale(db)
+        self.scale(scale=scale)
+        return self
+
     def normalize(self):
         """
         Normalize audio samples.
@@ -108,16 +139,17 @@ class AudioFile:
         self.samples = librosa.util.normalize(self.samples, axis=-1)
         return self
 
-    def clip(self, clip_amount: float = 2.0):
+    def clip(self, clip_db: float = 3.0):
         """
-        Digitally clip audio samples by scaling beyond [-1., 1.] and clipping to [-1., 1.].
+        Digitally clip audio samples by scaling beyond [-1., 1.], clipping to [-1., 1.], and reversing the scaling.
 
-        :param clip_amount: A number > 1.0 used to scale the normalized audio samples.
+        :param clip_db: Number of decibels to clip audio by.
         """
         peak = min(1.0, self.peak)
-        self.normalize().scale(clip_amount)
+        self.normalize().gain(db=clip_db)
         np.clip(self.samples, -1.0, 1.0, out=self.samples)
-        self.scale(peak / clip_amount)
+        self.gain(db=-clip_db)
+        self.scale(peak)
         return self
 
     def add_silence(self,
@@ -166,7 +198,7 @@ class AudioFile:
         in the middle of the current audio.
         :param: maintain_length: if true, mixed audio will be trimmed to maintain the same length as the original audio
         """
-        assert(self.sr == audio.sr)
+        assert (self.sr == audio.sr)
         shape = self.samples.shape
         audio = audio.copy()
 
@@ -198,19 +230,35 @@ class AudioFile:
         self.samples = filtered
         return self
 
+    def dynamic_lpf(self,
+                    cutoff: float,
+                    order: int = 1,
+                    relative_start: float = 0.0,
+                    relative_end: float = 1.0):
+        """
+        Dynamic low-pass filter.
+
+        :param cutoff: cutoff frequency in Hz.
+        :param order: the order of the filter.
+        :param relative_start: relative position to start filtering, 0.0 is the start of the audio.
+        :param relative_end:  relative position to end filtering, 0.0 is the end of the audio.
+        """
+        filtered = self.copy()
+        filtered.lpf(cutoff=cutoff, order=order)
+
     def conv_reverb(self,
                     ir: AudioFile,
-                    dry_mix: float = 1.0,
-                    wet_mix: float = 1.0,
+                    dry_db: float = 0.0,
+                    wet_db: float = 0.0,
                     predelay: float = 0.0,
                     trim_tail: bool = True):
         """
         Convolution reverb.
 
         :param ir: AudioFile containing impulse response.
-        :param dry_mix: scale of dry audio.
-        :param wet_mix: scale of wet audio.
-        :param predelay: predelay added to wet audio.
+        :param dry_db: db gain to apply to dry audio.
+        :param wet_db: db gain to apply to wet audio.
+        :param predelay: predelay in ms added to wet audio.
         :param trim_tail: if True, will trim tail of new audio to maintain length of original audio.
         """
         ir = ir.copy()
@@ -223,8 +271,8 @@ class AudioFile:
             convolution.samples.resize(self.samples.shape)
 
         if predelay > 0.0:
-            convolution.add_silence(sec_before=predelay/1000)
+            convolution.add_silence(sec_before=predelay / 1000)
 
-        self.scale(dry_mix).mix(convolution.scale(wet_mix), relative_start=0.0)
-        self.clip(clip_amount=1.0)
+        self.gain(dry_db).mix(convolution.gain(wet_db), relative_start=0.0)
+        self.clip(clip_db=0.0)
         return self
