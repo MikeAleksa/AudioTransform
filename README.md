@@ -5,8 +5,7 @@ AudioTransform is a package for modifying mono audio files for use in augmenting
 Operations:
 * load/save audio data
 * resample
-* scale amplitude by a linear constant in [0.0, 1.0]
-* adjust amplitude by a decibel amount
+* scale amplitude
 * normalize amplitude
 * digitally clip amplitude
 * pad with silence
@@ -34,13 +33,13 @@ audio1 = AudioFile('example1.wav')
 audio2 = AudioFile('example2.wav')
 
 # audio1 is mixed with (audio2 * 0.5) - after this operation, audio2 is now scaled by 0.5
-audio1.mix(audio2.scale(0.5, relative_start=0.0)
+audio1.mix(audio2.scale(0.5, relative_start=0.0))
 
 # The following line will mix audio1 with (audio2 * 0.5) - audio2 remains unchanged by this operation
-# The following line will mix audio1 with (audio2 * 0.5) - audio2 remains unchanged by this operation
-audio1.mix(audio2.copy().scale(0.5), relative_start=0.0)
+audio1.mix(audio2.copy.scale(0.5), relative_start=0.0))
 ```
 
 # TO-DO
 
 * Stereo file processing
+* Dynamic filtering
