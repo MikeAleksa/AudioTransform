@@ -113,6 +113,13 @@ class AudioFile:
         self.sr = new_sr
         return self
 
+    def invert_polarity(self):
+        """
+        Invert the polarity of the waveform.
+        """
+        self.scale(-1)
+        return self
+
     def scale(self, scale: float):
         """
         Scale amplitudes by a constant.
@@ -190,14 +197,14 @@ class AudioFile:
 
     def mix(self,
             audio: AudioFile,
-            relative_start: float = 1.0,
+            relative_start: float = 0.0,
             maintain_length: bool = False):
         """
         Combine two audio files.
 
         :param audio: an AudioFile to add to the current AudioFile.
         :param relative_start: the start position of audio relative to the current audio - i.e. 0.5 adds audio starting
-        in the middle of the current audio.
+            in the middle of the current audio.
         :param: maintain_length: if true, mixed audio will be trimmed to maintain the same length as the original audio
         """
         assert (self.sr == audio.sr)
@@ -228,6 +235,20 @@ class AudioFile:
         :param order: the order of the filter.
         """
         sos = signal.butter(order, cutoff, btype='low', analog=False, output='sos', fs=self.sr)
+        filtered = signal.sosfilt(sos, self.samples)
+        self.samples = filtered
+        return self
+
+    def hpf(self, cutoff: float, order: int = 1):
+        """
+        High-pass filter.
+
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.butter.html#scipy.signal.butter
+
+        :param cutoff: cutoff frequency in Hz.
+        :param order: the order of the filter.
+        """
+        sos = signal.butter(order, cutoff, btype='high', analog=False, output='sos', fs=self.sr)
         filtered = signal.sosfilt(sos, self.samples)
         self.samples = filtered
         return self

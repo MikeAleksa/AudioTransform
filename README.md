@@ -5,6 +5,7 @@ AudioTransform is a package for modifying mono audio files for use in augmenting
 Operations:
 * load/save audio data
 * resample
+* invert polarity
 * scale amplitude
 * apply gain adjustments in decibels
 * normalize amplitude
