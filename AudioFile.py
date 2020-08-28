@@ -139,14 +139,16 @@ class AudioFile:
         self.samples = librosa.util.normalize(self.samples, axis=-1)
         return self
 
-    def clip(self, clip_db: float = 3.0):
+    def clip(self, clip_db: float = 0.0):
         """
         Digitally clip audio samples by scaling beyond [-1., 1.], clipping to [-1., 1.], and reversing the scaling.
 
         :param clip_db: Number of decibels to clip audio by.
         """
         peak = min(1.0, self.peak)
-        self.normalize().gain(db=clip_db)
+        if peak < 1.0:
+            self.normalize()
+        self.gain(db=clip_db)
         np.clip(self.samples, -1.0, 1.0, out=self.samples)
         self.gain(db=-clip_db)
         self.scale(peak)
@@ -274,5 +276,5 @@ class AudioFile:
             convolution.add_silence(sec_before=predelay / 1000)
 
         self.gain(dry_db).mix(convolution.gain(wet_db), relative_start=0.0)
-        self.clip(clip_db=0.0)
+        self.clip()
         return self
