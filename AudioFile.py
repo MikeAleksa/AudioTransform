@@ -29,14 +29,14 @@ class AudioFile:
             self.load(path)
 
     @property
-    def length(self):
+    def length(self) -> int:
         """
         The length in samples of the audio data.
         """
         return self.samples.shape[-1]
 
     @property
-    def peak(self):
+    def peak(self) -> float:
         """
         The max absolute amplitude value.
         """
@@ -257,17 +257,33 @@ class AudioFile:
                     cutoff: float,
                     order: int = 1,
                     relative_start: float = 0.0,
-                    relative_end: float = 1.0):
+                    relative_end: float = 1.0,
+                    exponential: float = 1.0):
         """
         Dynamic low-pass filter.
 
         :param cutoff: cutoff frequency in Hz.
         :param order: the order of the filter.
         :param relative_start: relative position to start filtering, 0.0 is the start of the audio.
-        :param relative_end:  relative position to end filtering, 0.0 is the end of the audio.
+        :param relative_end: relative position to end filtering, 0.0 is the end of the audio.
+        :param exponential: exponential order dictates crossfade shape.
         """
-        filtered = self.copy()
-        filtered.lpf(cutoff=cutoff, order=order)
+        filtered = self.copy().lpf(cutoff=cutoff, order=order)
+
+        crossfade = np.zeros(self.samples.shape)
+        start_sample = int(self.length * relative_start)
+        end_sample = int(self.length * relative_end)
+        num = (end_sample - start_sample) // 2
+        fade = np.linspace(0.000001, 1.0, num=num) ** exponential
+
+        for i in range(fade.shape[-1]):
+            crossfade[start_sample+i] = fade[i]
+            crossfade[end_sample-i-1] = fade[i]
+
+        filtered.samples = filtered.samples * crossfade
+        self.samples = self.samples * (1.0 - crossfade)
+        self.mix(filtered)
+        return self
 
     def conv_reverb(self,
                     ir: AudioFile,

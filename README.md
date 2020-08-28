@@ -13,7 +13,9 @@ Operations:
 * pad with silence
 * varispeed - adjust time/pitch by altering playback speed
 * mix two audio files
-* low-pass filter
+* static low-pass filter
+* dynamic low-pass filter
+* static high-pass filter
 * convolution reverb
 
 # Installation
