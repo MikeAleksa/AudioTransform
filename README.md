@@ -23,9 +23,10 @@ pip install -r requirements.txt
 
 See `AugmentAudio.ipynb` for examples of how to process audio.
 
-Note - transformations are applied to object itself allowing method chaining for complex signal chains.
+Note - transformations are applied to the object itself, allowing method chaining for complex signal chains.
 
-If a transformation is only being applied temporarily (e.g. scaling amplitude during mixing) use the copy() method to create a new audio file to transform
+If a transformation is only being applied temporarily (e.g. scaling amplitude during mixing),
+use the copy() method to create a new audio file to transform.
 
 Example:
 
