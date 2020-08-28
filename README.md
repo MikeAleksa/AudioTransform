@@ -6,10 +6,11 @@ Operations:
 * load/save audio data
 * resample
 * scale amplitude
+* apply gain adjustments in decibels
 * normalize amplitude
 * digitally clip amplitude
 * pad with silence
-* varispeed
+* varispeed - adjust time/pitch by altering playback speed
 * mix two audio files
 * low-pass filter
 * convolution reverb
