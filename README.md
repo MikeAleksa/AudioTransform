@@ -1,6 +1,6 @@
 # AudioTransform
 
-AudioTransform is a package for modifying mono audio files for use in augmenting datasets of audio.
+AudioTransform is a package for modifying mono audio files of any sample rate, for use in augmenting datasets of audio.
 
 Operations:
 * load/save audio data
@@ -20,7 +20,28 @@ Operations:
 
 # Installation
 
+```
+# make virtual environment with Python 3.7
+conda create -n AudioTransform python=3.7
+source activate AudioTransform
+
+# clone repository
+git clone git@github.com:speechLabBcCuny/AudioTransform.git
+cd AudioTransform
+
+# install requirements from pip
 pip install -r requirements.txt
+
+# set up jupyter kernel
+conda install ipykernel
+ipython kernel install --user --name=AudioTransform     
+
+# start Jupyter server
+jupyter notebook --no-browser --port=8889
+
+# on local machine
+ssh -N -f -L localhost:8888:localhost:8889 [user]@[server]
+```
 
 # How To
 
@@ -47,4 +68,3 @@ audio1.mix(audio2.copy().scale(0.5), relative_start=0.0)
 # TO-DO
 
 * Stereo file processing
-* Dynamic filtering
