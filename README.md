@@ -65,6 +65,8 @@ audio1.mix(audio2.scale(0.5), relative_start=0.0)
 audio1.mix(audio2.copy().scale(0.5), relative_start=0.0)
 ```
 
-# TO-DO
+# Run Recipes
 
-* Stereo file processing
+```
+python3 <recipe_name>.py -i <input_dir> -o <output_dir>
+```
