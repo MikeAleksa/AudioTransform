@@ -2,7 +2,7 @@ from pathlib import Path
 from argparse import ArgumentParser
 from random import uniform, seed, choice
 
-from ..AudioFile import AudioFile
+from AudioFile import AudioFile
 
 SEED = 1234  # for reproducibility
 
