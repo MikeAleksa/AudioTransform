@@ -34,10 +34,10 @@ def augment(input_dir: Path, noise_dir: Path, output_dir: Path):
         noise = choice(tuple(noiselist))
 
         # load audio files and apply a random amount of processing to noisy file:
-        #   gain reduction in steps of -6 db from [-6 db, 0 db]
+        #   gain reduction in steps of -6 db
         #   varispeed between [0.9, 1.1]
         #   start position of audio in noise file (trimming start of file)
-        reduction = [0, -3, -6]
+        reduction = [-6, -12, -18]
         f1 = AudioFile(path=f1)
         noise = AudioFile(path=noise) \
             .trim_start(relative_start=uniform(0.0, 0.5)) \
@@ -60,7 +60,7 @@ def augment(input_dir: Path, noise_dir: Path, output_dir: Path):
 
         # choose random impulse response and add reverb to noisy audio
         ir = AudioFile(path=choice(irs))
-        f1.conv_reverb(ir, wet_db=uniform(-50, -20), predelay=uniform(0, 50))
+        f1.conv_reverb(ir, wet_db=uniform(-50, -25), predelay=uniform(0, 50))
 
         # filtering
         f1.lpf(uniform(5000, 8000))
