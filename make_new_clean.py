@@ -9,8 +9,6 @@ SEED = 1234  # for reproducibility
 
 def augment(input_dir: Path, output_dir: Path):
     seed(SEED)
-    filelist = set([x for x in input_dir.glob('*.wav')])
-    print("{} input files found".format(len(filelist)))
 
     if not input_dir.exists:
         raise Exception('Input directory does not exist.')
@@ -19,8 +17,11 @@ def augment(input_dir: Path, output_dir: Path):
         print("Making output directory {}".format(output_dir))
         output_dir.mkdir(parents=True)
 
+    filelist = set([x for x in input_dir.glob('*.wav')])
+    print("{} input files found".format(len(filelist)))
+
     while len(filelist) > 1:
-        print("Files remaining...")
+        print("{} files remaining...".format(len(filelist)))
         f1 = choice(tuple(filelist))
         filelist.remove(f1)
 

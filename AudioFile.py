@@ -161,6 +161,16 @@ class AudioFile:
         self.scale(peak)
         return self
 
+    def trim_start(self, relative_start: float = 0.0):
+        """
+        Trim the beginning of an audio file, leaving the remaining samples.
+
+        :param relative_start: The relative start position of the new audio file.
+        """
+        start_sample = int(self.length * relative_start)
+        self.samples = self.samples[start_sample:]
+        return self
+
     def add_silence(self,
                     samples_before: int = None,
                     samples_after: int = None,
