@@ -171,6 +171,16 @@ class AudioFile:
         self.samples = self.samples[start_sample:]
         return self
 
+    def trim_to_n_samples(self, n: int):
+        """
+        Trim an audio file to a specific number of samples.
+
+        :param n: The desired number of samples. Any samples after will be removed.
+        """
+        if n >= self.length:
+            self.samples = self.samples[:n]
+        return self
+
     def add_silence(self,
                     samples_before: int = None,
                     samples_after: int = None,

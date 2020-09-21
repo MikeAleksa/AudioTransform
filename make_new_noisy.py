@@ -42,9 +42,11 @@ def augment(input_dir: Path, noise_dir: Path, output_dir: Path):
         print("Loading files and modify noise file...")
         f1 = AudioFile(path=f1)
         noise = AudioFile(path=noise) \
+            .trim_start(relative_start=uniform(0.0, 0.5)) \
+            .trim_to_n_samples(n=f1.length) \
             .varispeed(uniform(0.9, 1.1)) \
-            .gain(choice(reduction)) \
-            .trim_start(relative_start=uniform(0.0, 0.5))
+            .gain(choice(reduction))
+
 
         # add dynamic lpf to simulate speaker turning away
         print("Applying dynamic lpf...")
