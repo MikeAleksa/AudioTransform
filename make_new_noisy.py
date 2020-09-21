@@ -26,7 +26,7 @@ def augment(input_dir: Path, noise_dir: Path, output_dir: Path):
     noiselist = set([x for x in noise_dir.glob('*.wav')])
     print("{} noise files found".format(len(noiselist)))
 
-    irs = [x for x in Path('./IMreverbs').glob('*.wav')]
+    irs = [x for x in Path('./IMreverbs-realistic').glob('*.wav')]
 
     while len(filelist) > 0:
         print("{} files remaining...".format(len(filelist)))
@@ -60,7 +60,7 @@ def augment(input_dir: Path, noise_dir: Path, output_dir: Path):
 
         # choose random impulse response and add reverb to noisy audio
         ir = AudioFile(path=choice(irs))
-        f1.conv_reverb(ir, wet_db=uniform(-50, -25), predelay=uniform(0, 50))
+        f1.conv_reverb(ir, wet_db=uniform(-70, -30), predelay=uniform(0, 50))
 
         # filtering
         f1.lpf(uniform(5000, 8000))
