@@ -60,7 +60,7 @@ def augment(input_dir: Path, noise_dir: Path, output_dir: Path):
 
         # choose random impulse response and add reverb to noisy audio
         ir = AudioFile(path=choice(irs))
-        f1.conv_reverb(ir, wet_db=uniform(-50, 10), predelay=uniform(0, 50))
+        f1.conv_reverb(ir, wet_db=uniform(-50, -20), predelay=uniform(0, 50))
 
         # filtering
         f1.lpf(uniform(5000, 8000))
