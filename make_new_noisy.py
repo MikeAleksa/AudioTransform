@@ -45,11 +45,14 @@ def augment(input_dir: Path, noise_dir: Path, output_dir: Path):
             .trim_start(relative_start=uniform(0.0, 0.5))
 
         # add dynamic lpf to simulate speaker turning away
-        f1.dynamic_lpf(cutoff=uniform(1000, 8000),
-                       order=randint(0, 3),
-                       relative_start=random(),
-                       relative_end=random(),
-                       exponential=random())
+        filter_start = random()
+        filter_end = random()
+        if filter_start < filter_end:
+            f1.dynamic_lpf(cutoff=uniform(1000, 8000),
+                           order=randint(0, 3),
+                           relative_start=random(),
+                           relative_end=random(),
+                           exponential=random())
 
         # add noise to audio
         f1.mix(noise, maintain_length=True)
