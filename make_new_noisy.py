@@ -55,8 +55,8 @@ def augment(input_dir: Path, noise_dir: Path, output_dir: Path):
         if filter_start < filter_end:
             f1.dynamic_lpf(cutoff=uniform(1000, 8000),
                            order=randint(0, 3),
-                           relative_start=random(),
-                           relative_end=random(),
+                           relative_start=filter_start,
+                           relative_end=filter_end,
                            exponential=random())
 
         # add noise to audio
