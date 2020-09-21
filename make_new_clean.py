@@ -43,7 +43,6 @@ def augment(input_dir: Path, output_dir: Path):
 
         # save as new clean file
         filename = f1.filename.split(".wav")[0] + "_" + f2.filename
-        print("Saving file {}".format(filename))
         f1.save(output_path=output_dir, filename=filename)
 
 

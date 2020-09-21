@@ -31,7 +31,6 @@ def augment(input_dir: Path, noise_dir: Path, output_dir: Path):
     while len(filelist) > 0:
         print("{} files remaining...".format(len(filelist)))
         f1 = filelist.pop()
-        print("Choosing noise file...")
         noise = choice(tuple(noiselist))
 
         # load audio files and apply a random amount of processing to noisy file:
@@ -39,17 +38,14 @@ def augment(input_dir: Path, noise_dir: Path, output_dir: Path):
         #   varispeed between [0.9, 1.1]
         #   start position of audio in noise file (trimming start of file)
         reduction = [0, -3, -6]
-        print("Loading files and modify noise file...")
         f1 = AudioFile(path=f1)
         noise = AudioFile(path=noise) \
             .trim_start(relative_start=uniform(0.0, 0.5)) \
-            .trim_to_n_samples(n=f1.length) \
-            .varispeed(uniform(0.9, 1.1)) \
-            .gain(choice(reduction))
+            .trim_to_n_samples(n=f1.length)
+        noise = noise.varispeed(uniform(0.9, 1.1)).gain(choice(reduction))
 
 
         # add dynamic lpf to simulate speaker turning away
-        print("Applying dynamic lpf...")
         filter_start = random()
         filter_end = random()
         if filter_start < filter_end:
@@ -60,26 +56,21 @@ def augment(input_dir: Path, noise_dir: Path, output_dir: Path):
                            exponential=random())
 
         # add noise to audio
-        print("Mixing clean audio and noise...")
         f1.mix(noise, maintain_length=True)
 
         # choose random impulse response and add reverb to noisy audio
-        print("Applying convolution reverb...")
         ir = AudioFile(path=choice(irs))
         f1.conv_reverb(ir, wet_db=uniform(-50, 10), predelay=uniform(0, 50))
 
         # filtering
-        print("Applying static LPF and HPF...")
         f1.lpf(uniform(5000, 8000))
         f1.hpf(uniform(0, 250))
 
         # clipping
-        print("Applying digital clipping...")
         clipping = [0.0, 1.0, 2.0, 3.0]
         f1.clip(choice(clipping))
 
         # save
-        print("Saving file...")
         f1.save(output_path=output_dir)
 
 
