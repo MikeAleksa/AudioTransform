@@ -29,9 +29,9 @@ def augment(input_dir: Path, output_dir: Path):
         filelist.remove(f2)
 
         # load audio files and apply a random amount of:
-        #   gain reduction in steps of -6 db from [-24 db, 0 db]
+        #   gain reduction in steps of -3 db from [-15 db, 0 db]
         #   varispeed between [0.9, 1.1]
-        reduction = [0, -6, -12, -18, -24]
+        reduction = [0, -3, -6, -12, -15]
         f1 = AudioFile(path=f1).varispeed(uniform(0.9, 1.1)).gain(choice(reduction))
         f2 = AudioFile(path=f2).varispeed(uniform(0.9, 1.1)).gain(choice(reduction))
 
