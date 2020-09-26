@@ -225,7 +225,7 @@ class AudioFile:
         :param audio: an AudioFile to add to the current AudioFile.
         :param relative_start: the start position of audio relative to the current audio - i.e. 0.5 adds audio starting
             in the middle of the current audio.
-        :param: maintain_length: if true, mixed audio will be trimmed to maintain the same length as the original audio
+        :param maintain_length: if true, mixed audio will be trimmed to maintain the same length as the original audio
         """
         assert (self.sr == audio.sr)
         shape = self.samples.shape
@@ -326,12 +326,10 @@ class AudioFile:
 
         convolution = self.copy()
         convolution.samples = signal.convolve(self.samples, ir.samples, mode='full')
-        if trim_tail:
-            convolution.samples.resize(self.samples.shape)
 
         if predelay > 0.0:
             convolution.add_silence(sec_before=predelay / 1000)
 
-        self.gain(dry_db).mix(convolution.gain(wet_db), relative_start=0.0)
+        self.gain(dry_db).mix(convolution.gain(wet_db), relative_start=0.0, maintain_length=trim_tail)
         self.clip()
         return self
