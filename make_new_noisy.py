@@ -26,23 +26,28 @@ def augment(input_dir: Path, noise_dir: Path, output_dir: Path):
     noiselist = set([x for x in noise_dir.glob('*.wav')])
     print("{} noise files found".format(len(noiselist)))
 
+    print("Loading noise files into memory...")
+    noise_files = [AudioFile(path=x) for x in noiselist]
+    print("Done loading noise files.")
+
     irs = [x for x in Path('./IMreverbs-realistic').glob('*.wav')]
 
     while len(filelist) > 0:
         print("{} files remaining...".format(len(filelist)))
         f1 = filelist.pop()
-        noise = choice(tuple(noiselist))
+        noise = choice(noise_files)
 
         # load audio files and apply a random amount of processing to noisy file:
         #   gain reduction in steps of -6 db
         #   varispeed between [0.9, 1.1]
         #   start position of audio in noise file (trimming start of file)
-        reduction = [-6, -12, -18]
+        gain = [6, 3, 1.5, 0, -1.5, -3, -6]
         f1 = AudioFile(path=f1)
-        noise = AudioFile(path=noise) \
+        noise = noise.copy() \
             .trim_start(relative_start=uniform(0.0, 0.5)) \
             .trim_to_n_samples(n=f1.length)
-        noise = noise.varispeed(uniform(0.9, 1.1)).gain(choice(reduction))
+        # noise = noise.varispeed(uniform(0.9, 1.1))
+        noise = noise.gain(choice(gain)).clip()
 
 
         # add dynamic lpf to simulate speaker turning away
